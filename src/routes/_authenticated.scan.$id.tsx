@@ -115,7 +115,7 @@ function ScanDetail() {
         ) : (
           <div className="space-y-2">
             {issues.map((i) => (
-              <IssueCard key={i.id} issue={i} />
+              <IssueCard key={i.id} issue={i as unknown as Issue} />
             ))}
           </div>
         )}

@@ -83,14 +83,12 @@ export const runScan = createServerFn({ method: "POST" })
         .map((l, i) => `${String(i + 1).padStart(4, " ")}  ${l}`)
         .join("\n");
 
-      const { experimental_output } = await generateText({
+      const { output: a } = await generateText({
         model: gateway("google/gemini-3-flash-preview"),
         system: SYSTEM_PROMPT,
-        experimental_output: Output.object({ schema: AnalysisSchema }),
+        output: Output.object({ schema: AnalysisSchema }),
         prompt: `Language: ${data.language}\n\nCode (line-numbered):\n\`\`\`\n${numbered}\n\`\`\``,
       });
-
-      const a = experimental_output;
 
       await supabase
         .from("scans")
@@ -114,7 +112,7 @@ export const runScan = createServerFn({ method: "POST" })
 
       if (a.issues.length > 0) {
         await supabase.from("scan_issues").insert(
-          a.issues.map((i) => ({
+          a.issues.map((i: z.infer<typeof AnalysisSchema>["issues"][number]) => ({
             scan_id: scan.id,
             user_id: userId,
             category: i.category,

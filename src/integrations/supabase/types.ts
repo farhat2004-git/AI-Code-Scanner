@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scan_issues: {
+        Row: {
+          category: string
+          code_snippet: string | null
+          created_at: string
+          cvss: number | null
+          description: string | null
+          fix_explanation: string | null
+          fixed_code: string | null
+          id: string
+          line_end: number | null
+          line_start: number | null
+          scan_id: string
+          severity: string
+          title: string
+          user_id: string
+          why_dangerous: string | null
+        }
+        Insert: {
+          category: string
+          code_snippet?: string | null
+          created_at?: string
+          cvss?: number | null
+          description?: string | null
+          fix_explanation?: string | null
+          fixed_code?: string | null
+          id?: string
+          line_end?: number | null
+          line_start?: number | null
+          scan_id: string
+          severity: string
+          title: string
+          user_id: string
+          why_dangerous?: string | null
+        }
+        Update: {
+          category?: string
+          code_snippet?: string | null
+          created_at?: string
+          cvss?: number | null
+          description?: string | null
+          fix_explanation?: string | null
+          fixed_code?: string | null
+          id?: string
+          line_end?: number | null
+          line_start?: number | null
+          scan_id?: string
+          severity?: string
+          title?: string
+          user_id?: string
+          why_dangerous?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_issues_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scans: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          language: string
+          maintainability_score: number | null
+          overall_score: number | null
+          performance_score: number | null
+          quality_score: number | null
+          scores: Json | null
+          security_score: number | null
+          source_code: string
+          status: string
+          summary: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          language: string
+          maintainability_score?: number | null
+          overall_score?: number | null
+          performance_score?: number | null
+          quality_score?: number | null
+          scores?: Json | null
+          security_score?: number | null
+          source_code: string
+          status?: string
+          summary?: string | null
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          language?: string
+          maintainability_score?: number | null
+          overall_score?: number | null
+          performance_score?: number | null
+          quality_score?: number | null
+          scores?: Json | null
+          security_score?: number | null
+          source_code?: string
+          status?: string
+          summary?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

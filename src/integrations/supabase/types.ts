@@ -80,14 +80,18 @@ export type Database = {
         Row: {
           created_at: string
           error: string | null
+          file_path: string | null
           id: string
           language: string
           maintainability_score: number | null
           overall_score: number | null
           performance_score: number | null
           quality_score: number | null
+          ref: string | null
+          repo_full_name: string | null
           scores: Json | null
           security_score: number | null
+          source: string
           source_code: string
           status: string
           summary: string | null
@@ -97,14 +101,18 @@ export type Database = {
         Insert: {
           created_at?: string
           error?: string | null
+          file_path?: string | null
           id?: string
           language: string
           maintainability_score?: number | null
           overall_score?: number | null
           performance_score?: number | null
           quality_score?: number | null
+          ref?: string | null
+          repo_full_name?: string | null
           scores?: Json | null
           security_score?: number | null
+          source?: string
           source_code: string
           status?: string
           summary?: string | null
@@ -114,14 +122,18 @@ export type Database = {
         Update: {
           created_at?: string
           error?: string | null
+          file_path?: string | null
           id?: string
           language?: string
           maintainability_score?: number | null
           overall_score?: number | null
           performance_score?: number | null
           quality_score?: number | null
+          ref?: string | null
+          repo_full_name?: string | null
           scores?: Json | null
           security_score?: number | null
+          source?: string
           source_code?: string
           status?: string
           summary?: string | null

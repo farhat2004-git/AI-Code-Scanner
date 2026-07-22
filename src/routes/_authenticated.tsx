@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogOut, LayoutDashboard, Plus } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Plus, Github } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
@@ -48,6 +48,14 @@ function AuthLayout() {
               >
                 <Plus className="mr-1 inline h-3.5 w-3.5" />
                 New scan
+              </Link>
+              <Link
+                to="/github"
+                className="rounded-md px-3 py-1.5 hover:bg-surface hover:text-foreground [&.active]:bg-surface [&.active]:text-foreground"
+                activeProps={{ className: "active" }}
+              >
+                <Github className="mr-1 inline h-3.5 w-3.5" />
+                GitHub
               </Link>
             </nav>
           </div>

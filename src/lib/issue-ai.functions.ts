@@ -21,14 +21,22 @@ const FixSchema = z.object({
 export type ExplainResult = z.infer<typeof ExplainSchema>;
 export type FixResult = z.infer<typeof FixSchema>;
 
-async function loadIssue(supabase: ReturnType<typeof requireSupabaseAuth> extends never ? never : any, issueId: string) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadIssue(supabase: any, issueId: string) {
   const { data, error } = await supabase
     .from("scan_issues")
     .select("*, scans(language, source_code)")
     .eq("id", issueId)
     .single();
   if (error || !data) throw new Error(error?.message ?? "Issue not found");
-  return data;
+  return data as {
+    title: string;
+    severity: string;
+    category: string;
+    description: string | null;
+    code_snippet: string | null;
+    scans: { language: string; source_code: string } | null;
+  };
 }
 
 export const explainIssue = createServerFn({ method: "POST" })

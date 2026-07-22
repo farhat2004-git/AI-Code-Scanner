@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedGithubRouteImport } from './routes/_authenticated.github'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedScanNewRouteImport } from './routes/_authenticated.scan.new'
 import { Route as AuthenticatedScanIdRouteImport } from './routes/_authenticated.scan.$id'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedGithubRoute = AuthenticatedGithubRouteImport.update({
+  id: '/github',
+  path: '/github',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/github': typeof AuthenticatedGithubRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/github': typeof AuthenticatedGithubRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/github': typeof AuthenticatedGithubRoute
   '/_authenticated/scan/$id': typeof AuthenticatedScanIdRoute
   '/_authenticated/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -85,10 +94,18 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/dashboard'
+    | '/github'
     | '/scan/$id'
     | '/scan/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/sitemap.xml' | '/dashboard' | '/scan/$id' | '/scan/new'
+  to:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/dashboard'
+    | '/github'
+    | '/scan/$id'
+    | '/scan/new'
   id:
     | '__root__'
     | '/'
@@ -96,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/sitemap.xml'
     | '/_authenticated/dashboard'
+    | '/_authenticated/github'
     | '/_authenticated/scan/$id'
     | '/_authenticated/scan/new'
   fileRoutesById: FileRoutesById
@@ -137,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/github': {
+      id: '/_authenticated/github'
+      path: '/github'
+      fullPath: '/github'
+      preLoaderRoute: typeof AuthenticatedGithubRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -163,12 +188,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGithubRoute: typeof AuthenticatedGithubRoute
   AuthenticatedScanIdRoute: typeof AuthenticatedScanIdRoute
   AuthenticatedScanNewRoute: typeof AuthenticatedScanNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGithubRoute: AuthenticatedGithubRoute,
   AuthenticatedScanIdRoute: AuthenticatedScanIdRoute,
   AuthenticatedScanNewRoute: AuthenticatedScanNewRoute,
 }

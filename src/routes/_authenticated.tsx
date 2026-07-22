@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
-import { Loader2, LogOut, LayoutDashboard, Plus } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Plus, Github } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,

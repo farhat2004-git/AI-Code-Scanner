@@ -49,6 +49,14 @@ function AuthLayout() {
                 <Plus className="mr-1 inline h-3.5 w-3.5" />
                 New scan
               </Link>
+              <Link
+                to="/github"
+                className="rounded-md px-3 py-1.5 hover:bg-surface hover:text-foreground [&.active]:bg-surface [&.active]:text-foreground"
+                activeProps={{ className: "active" }}
+              >
+                <Github className="mr-1 inline h-3.5 w-3.5" />
+                GitHub
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-3">

@@ -76,8 +76,9 @@ function AuthLayout() {
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
+            <NotificationCenter />
             <Button
               variant="ghost"
               size="sm"

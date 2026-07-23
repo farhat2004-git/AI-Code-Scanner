@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { NotificationCenter } from "@/components/notification-center";
 import { Loader2, LogOut, LayoutDashboard, Plus, Github, ShieldAlert, BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -75,8 +76,9 @@ function AuthLayout() {
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
+            <NotificationCenter />
             <Button
               variant="ghost"
               size="sm"

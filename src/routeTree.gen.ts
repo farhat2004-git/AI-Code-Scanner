@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated.notifications'
 import { Route as AuthenticatedGithubRouteImport } from './routes/_authenticated.github'
 import { Route as AuthenticatedDepsRouteImport } from './routes/_authenticated.deps'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -39,6 +40,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedGithubRoute = AuthenticatedGithubRouteImport.update({
   id: '/github',
   path: '/github',
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deps': typeof AuthenticatedDepsRoute
   '/github': typeof AuthenticatedGithubRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deps': typeof AuthenticatedDepsRoute
   '/github': typeof AuthenticatedGithubRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -102,6 +111,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deps': typeof AuthenticatedDepsRoute
   '/_authenticated/github': typeof AuthenticatedGithubRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/scan/$id': typeof AuthenticatedScanIdRoute
   '/_authenticated/scan/new': typeof AuthenticatedScanNewRoute
 }
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deps'
     | '/github'
+    | '/notifications'
     | '/scan/$id'
     | '/scan/new'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deps'
     | '/github'
+    | '/notifications'
     | '/scan/$id'
     | '/scan/new'
   id:
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/deps'
     | '/_authenticated/github'
+    | '/_authenticated/notifications'
     | '/_authenticated/scan/$id'
     | '/_authenticated/scan/new'
   fileRoutesById: FileRoutesById
@@ -178,6 +191,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/github': {
       id: '/_authenticated/github'
@@ -229,6 +249,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepsRoute: typeof AuthenticatedDepsRoute
   AuthenticatedGithubRoute: typeof AuthenticatedGithubRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedScanIdRoute: typeof AuthenticatedScanIdRoute
   AuthenticatedScanNewRoute: typeof AuthenticatedScanNewRoute
 }
@@ -238,6 +259,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepsRoute: AuthenticatedDepsRoute,
   AuthenticatedGithubRoute: AuthenticatedGithubRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedScanIdRoute: AuthenticatedScanIdRoute,
   AuthenticatedScanNewRoute: AuthenticatedScanNewRoute,
 }

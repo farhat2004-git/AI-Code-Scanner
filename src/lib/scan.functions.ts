@@ -130,6 +130,25 @@ export const runScan = createServerFn({ method: "POST" })
         );
       }
 
+      const criticals = a.issues.filter((i) => i.severity === "critical").length;
+      const highs = a.issues.filter((i) => i.severity === "high").length;
+      const notifType = criticals > 0 ? "critical" : highs > 0 ? "warning" : "success";
+      const parts: string[] = [];
+      if (criticals) parts.push(`${criticals} critical`);
+      if (highs) parts.push(`${highs} high`);
+      const summary = parts.length
+        ? `Found ${parts.join(", ")} · score ${Math.round(a.overall_score)}/100`
+        : `Clean scan · score ${Math.round(a.overall_score)}/100`;
+
+      await supabase.from("notifications").insert({
+        user_id: userId,
+        title: `Scan complete: ${data.title}`,
+        body: summary,
+        type: notifType,
+        link: `/scan/${scan.id}`,
+      });
+
+
       return { scan_id: scan.id };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

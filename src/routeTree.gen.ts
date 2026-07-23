@@ -14,7 +14,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedGithubRouteImport } from './routes/_authenticated.github'
+import { Route as AuthenticatedDepsRouteImport } from './routes/_authenticated.deps'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated.analytics'
 import { Route as AuthenticatedScanNewRouteImport } from './routes/_authenticated.scan.new'
 import { Route as AuthenticatedScanIdRouteImport } from './routes/_authenticated.scan.$id'
 
@@ -42,9 +44,19 @@ const AuthenticatedGithubRoute = AuthenticatedGithubRouteImport.update({
   path: '/github',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDepsRoute = AuthenticatedDepsRouteImport.update({
+  id: '/deps',
+  path: '/deps',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedScanNewRoute = AuthenticatedScanNewRouteImport.update({
@@ -62,7 +74,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/deps': typeof AuthenticatedDepsRoute
   '/github': typeof AuthenticatedGithubRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
@@ -71,7 +85,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/deps': typeof AuthenticatedDepsRoute
   '/github': typeof AuthenticatedGithubRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
@@ -82,7 +98,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/deps': typeof AuthenticatedDepsRoute
   '/_authenticated/github': typeof AuthenticatedGithubRoute
   '/_authenticated/scan/$id': typeof AuthenticatedScanIdRoute
   '/_authenticated/scan/new': typeof AuthenticatedScanNewRoute
@@ -93,7 +111,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sitemap.xml'
+    | '/analytics'
     | '/dashboard'
+    | '/deps'
     | '/github'
     | '/scan/$id'
     | '/scan/new'
@@ -102,7 +122,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/sitemap.xml'
+    | '/analytics'
     | '/dashboard'
+    | '/deps'
     | '/github'
     | '/scan/$id'
     | '/scan/new'
@@ -112,7 +134,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/sitemap.xml'
+    | '/_authenticated/analytics'
     | '/_authenticated/dashboard'
+    | '/_authenticated/deps'
     | '/_authenticated/github'
     | '/_authenticated/scan/$id'
     | '/_authenticated/scan/new'
@@ -162,11 +186,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGithubRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/deps': {
+      id: '/_authenticated/deps'
+      path: '/deps'
+      fullPath: '/deps'
+      preLoaderRoute: typeof AuthenticatedDepsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/scan/new': {
@@ -187,14 +225,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDepsRoute: typeof AuthenticatedDepsRoute
   AuthenticatedGithubRoute: typeof AuthenticatedGithubRoute
   AuthenticatedScanIdRoute: typeof AuthenticatedScanIdRoute
   AuthenticatedScanNewRoute: typeof AuthenticatedScanNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDepsRoute: AuthenticatedDepsRoute,
   AuthenticatedGithubRoute: AuthenticatedGithubRoute,
   AuthenticatedScanIdRoute: AuthenticatedScanIdRoute,
   AuthenticatedScanNewRoute: AuthenticatedScanNewRoute,

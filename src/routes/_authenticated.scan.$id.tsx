@@ -1,15 +1,17 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, ScorePill, ScoreBar } from "@/components/scan-ui";
-import { Loader2, ArrowLeft, FileCode2, Sparkles, Wand2, Download, Copy } from "lucide-react";
+import { Loader2, ArrowLeft, FileCode2, Sparkles, Wand2, Download, Copy, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
 import { explainIssue, generateFix, type ExplainResult, type FixResult } from "@/lib/issue-ai.functions";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
+import { IssueComments, IssueStatusBadge, IssueStatusControl } from "@/components/issue-collab";
 
 export const Route = createFileRoute("/_authenticated/scan/$id")({
   head: () => ({ meta: [{ title: "Scan report — AI Code Guardian" }] }),
@@ -20,6 +22,9 @@ const SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3, info: 4 } as const;
 
 function ScanDetail() {
   const { id } = useParams({ from: "/_authenticated/scan/$id" });
+  const { user } = useAuth();
+  const qc = useQueryClient();
+
 
   const scanQ = useQuery({
     queryKey: ["scan", id],
@@ -46,6 +51,41 @@ function ScanDetail() {
     },
   });
 
+  const teamsQ = useQuery({
+    queryKey: ["my-teams"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("role, team_id, teams(id, name)");
+      if (error) throw error;
+      return (data ?? []).filter((m) => m.teams);
+    },
+  });
+
+  const scanTeamId = scanQ.data?.team_id ?? null;
+
+  const teamMembersQ = useQuery({
+    queryKey: ["team-members", scanTeamId],
+    enabled: !!scanTeamId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("user_id, role")
+        .eq("team_id", scanTeamId!);
+      if (error) throw error;
+      const ids = (data ?? []).map((m) => m.user_id);
+      const profiles = ids.length
+        ? (await supabase.from("profiles").select("id, email, display_name").in("id", ids)).data ??
+          []
+        : [];
+      const byId = new Map(profiles.map((p) => [p.id, p]));
+      return (data ?? []).map((m) => ({
+        ...m,
+        name: byId.get(m.user_id)?.display_name ?? byId.get(m.user_id)?.email ?? "Member",
+      }));
+    },
+  });
+
   if (scanQ.isLoading) {
     return (
       <div className="grid place-items-center py-20">
@@ -56,6 +96,17 @@ function ScanDetail() {
   if (!scanQ.data) return <div>Not found</div>;
   const scan = scanQ.data;
   const issues = issuesQ.data ?? [];
+  const members = teamMembersQ.data ?? [];
+  const myTeamRole = scanTeamId
+    ? (teamsQ.data ?? []).find((m) => m.team_id === scanTeamId)?.role
+    : undefined;
+  const isOwner = scan.user_id === user?.id;
+  const canWrite = isOwner || myTeamRole === "admin" || myTeamRole === "developer";
+  const names: Record<string, string> = Object.fromEntries(
+    members.map((m) => [m.user_id, m.name]),
+  );
+  if (user?.id && !names[user.id]) names[user.id] = "You";
+
 
   return (
     <div className="space-y-6">
@@ -110,6 +161,21 @@ function ScanDetail() {
         </div>
       )}
 
+      <CollabBar
+        scanId={scan.id}
+        teamId={scanTeamId}
+        assignedTo={scan.assigned_to}
+        isOwner={isOwner}
+        canWrite={canWrite}
+        teams={(teamsQ.data ?? []).map((m) => ({
+          id: (m.teams as { id: string; name: string }).id,
+          name: (m.teams as { id: string; name: string }).name,
+          role: m.role as string,
+        }))}
+        members={members}
+        onChanged={() => qc.invalidateQueries({ queryKey: ["scan", scan.id] })}
+      />
+
       <div>
         <h2 className="mb-3 text-sm font-medium text-muted-foreground">Issues</h2>
         {issues.length === 0 ? (
@@ -119,7 +185,15 @@ function ScanDetail() {
         ) : (
           <div className="space-y-2">
             {issues.map((i) => (
-              <IssueCard key={i.id} issue={i as unknown as Issue} language={scan.language} />
+              <IssueCard
+                key={i.id}
+                issue={i as unknown as Issue}
+                language={scan.language}
+                scanId={scan.id}
+                userId={user?.id}
+                canWrite={canWrite}
+                names={names}
+              />
             ))}
           </div>
         )}
@@ -141,7 +215,112 @@ type Issue = {
   fix_explanation: string | null;
   fixed_code: string | null;
   code_snippet: string | null;
+  status?: string | null;
 };
+
+function CollabBar({
+  scanId,
+  teamId,
+  assignedTo,
+  isOwner,
+  canWrite,
+  teams,
+  members,
+  onChanged,
+}: {
+  scanId: string;
+  teamId: string | null;
+  assignedTo: string | null;
+  isOwner: boolean;
+  canWrite: boolean;
+  teams: { id: string; name: string; role: string }[];
+  members: { user_id: string; name: string }[];
+  onChanged: () => void;
+}) {
+  const shareM = useMutation({
+    mutationFn: async (nextTeam: string | null) => {
+      const { error } = await supabase
+        .from("scans")
+        .update({ team_id: nextTeam, assigned_to: nextTeam ? assignedTo : null })
+        .eq("id", scanId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      onChanged();
+      toast.success("Sharing updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const assignM = useMutation({
+    mutationFn: async (uid: string | null) => {
+      const { error } = await supabase.from("scans").update({ assigned_to: uid }).eq("id", scanId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      onChanged();
+      toast.success("Assignment updated");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface p-4">
+      <Users className="h-4 w-4 text-primary" />
+      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <span>Shared with</span>
+        {isOwner ? (
+          <select
+            value={teamId ?? ""}
+            onChange={(e) => shareM.mutate(e.target.value || null)}
+            className="rounded-md border border-border bg-surface-2 px-2 py-1 text-xs text-foreground"
+          >
+            <option value="">Nobody (private)</option>
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-foreground">
+            {teams.find((t) => t.id === teamId)?.name ?? "your team"}
+          </span>
+        )}
+      </div>
+
+      {teamId && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span>Assigned to</span>
+          {canWrite ? (
+            <select
+              value={assignedTo ?? ""}
+              onChange={(e) => assignM.mutate(e.target.value || null)}
+              className="rounded-md border border-border bg-surface-2 px-2 py-1 text-xs text-foreground"
+            >
+              <option value="">Unassigned</option>
+              {members.map((m) => (
+                <option key={m.user_id} value={m.user_id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-foreground">
+              {members.find((m) => m.user_id === assignedTo)?.name ?? "Unassigned"}
+            </span>
+          )}
+        </div>
+      )}
+
+      {!canWrite && (
+        <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
+          View only
+        </span>
+      )}
+    </div>
+  );
+}
 
 function confidenceFromCvss(cvss: number | null, severity: string): { label: string; tone: string } {
   const c = cvss ?? (severity === "critical" ? 9 : severity === "high" ? 7.5 : severity === "medium" ? 5 : severity === "low" ? 2 : 1);
@@ -150,7 +329,21 @@ function confidenceFromCvss(cvss: number | null, severity: string): { label: str
   return { label: "Low confidence", tone: "text-sev-low border-sev-low/40 bg-sev-low/10" };
 }
 
-function IssueCard({ issue, language }: { issue: Issue; language: string }) {
+function IssueCard({
+  issue,
+  language,
+  scanId,
+  userId,
+  canWrite,
+  names,
+}: {
+  issue: Issue;
+  language: string;
+  scanId: string;
+  userId: string | undefined;
+  canWrite: boolean;
+  names: Record<string, string>;
+}) {
   const [open, setOpen] = useState(false);
   const [explanation, setExplanation] = useState<ExplainResult | null>(null);
   const [fix, setFix] = useState<(FixResult & { original: string }) | null>(null);
@@ -195,9 +388,21 @@ function IssueCard({ issue, language }: { issue: Issue; language: string }) {
         <span className={`hidden rounded border px-1.5 py-0.5 text-[10px] md:inline ${conf.tone}`}>
           {conf.label}
         </span>
+        <IssueStatusBadge status={issue.status} />
       </button>
       {open && (
         <div className="space-y-4 border-t border-border px-4 py-4 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground">Status</span>
+            <IssueStatusControl
+              issueId={issue.id}
+              scanId={scanId}
+              status={issue.status}
+              canWrite={canWrite}
+              userId={userId}
+            />
+          </div>
+
           {issue.description && (
             <p className="text-muted-foreground">{issue.description}</p>
           )}
@@ -264,6 +469,14 @@ function IssueCard({ issue, language }: { issue: Issue; language: string }) {
               <p>{issue.fix_explanation}</p>
             </div>
           )}
+
+          <IssueComments
+            issueId={issue.id}
+            scanId={scanId}
+            userId={userId}
+            canComment={canWrite}
+            names={names}
+          />
         </div>
       )}
     </div>

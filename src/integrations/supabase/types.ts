@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      issue_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          issue_id: string
+          scan_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          issue_id: string
+          scan_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          issue_id?: string
+          scan_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_comments_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "scan_issues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issue_comments_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -47,6 +92,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       scan_issues: {
         Row: {
           category: string
@@ -61,6 +133,9 @@ export type Database = {
           line_start: number | null
           scan_id: string
           severity: string
+          status: string
+          status_at: string | null
+          status_by: string | null
           title: string
           user_id: string
           why_dangerous: string | null
@@ -78,6 +153,9 @@ export type Database = {
           line_start?: number | null
           scan_id: string
           severity: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
           title: string
           user_id: string
           why_dangerous?: string | null
@@ -95,6 +173,9 @@ export type Database = {
           line_start?: number | null
           scan_id?: string
           severity?: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
           title?: string
           user_id?: string
           why_dangerous?: string | null
@@ -111,6 +192,7 @@ export type Database = {
       }
       scans: {
         Row: {
+          assigned_to: string | null
           created_at: string
           error: string | null
           file_path: string | null
@@ -128,10 +210,12 @@ export type Database = {
           source_code: string
           status: string
           summary: string | null
+          team_id: string | null
           title: string
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           error?: string | null
           file_path?: string | null
@@ -149,10 +233,12 @@ export type Database = {
           source_code: string
           status?: string
           summary?: string | null
+          team_id?: string | null
           title?: string
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           error?: string | null
           file_path?: string | null
@@ -170,8 +256,111 @@ export type Database = {
           source_code?: string
           status?: string
           summary?: string | null
+          team_id?: string | null
           title?: string
           user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["team_role"]
+          status: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -180,10 +369,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_read_scan: {
+        Args: { _scan_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_team_write: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      current_user_email: { Args: never; Returns: string }
+      get_team_role: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["team_role"]
+      }
+      has_team_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["team_role"]
+          _team_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      scan_team: { Args: { _scan_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      team_role: "admin" | "developer" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -310,6 +524,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      team_role: ["admin", "developer", "viewer"],
+    },
   },
 } as const

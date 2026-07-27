@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notification-center";
-import { Loader2, LogOut, LayoutDashboard, Plus, Github, ShieldAlert, BarChart3 } from "lucide-react";
+import { Loader2, LogOut, LayoutDashboard, Plus, Github, ShieldAlert, BarChart3, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
@@ -65,6 +65,14 @@ function AuthLayout() {
               >
                 <BarChart3 className="mr-1 inline h-3.5 w-3.5" />
                 Analytics
+              </Link>
+              <Link
+                to="/teams"
+                className="rounded-md px-3 py-1.5 hover:bg-surface hover:text-foreground [&.active]:bg-surface [&.active]:text-foreground"
+                activeProps={{ className: "active" }}
+              >
+                <Users className="mr-1 inline h-3.5 w-3.5" />
+                Teams
               </Link>
               <Link
                 to="/github"

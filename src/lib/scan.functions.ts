@@ -14,29 +14,54 @@ const CATEGORIES = [
   "maintainability",
 ] as const;
 
+const num = z.number().nullish();
+
 const AnalysisSchema = z.object({
-  summary: z.string(),
-  overall_score: z.number(),
-  security_score: z.number(),
-  quality_score: z.number(),
-  performance_score: z.number(),
-  maintainability_score: z.number(),
-  issues: z.array(
-    z.object({
-      title: z.string(),
-      category: z.enum(CATEGORIES),
-      severity: z.enum(SEVERITIES),
-      description: z.string(),
-      why_dangerous: z.string().nullable(),
-      line_start: z.number().nullable(),
-      line_end: z.number().nullable(),
-      cvss: z.number().nullable(),
-      fix_explanation: z.string().nullable(),
-      fixed_code: z.string().nullable(),
-      code_snippet: z.string().nullable(),
-    }),
-  ),
+  summary: z.string().nullish(),
+  overall_score: num,
+  security_score: num,
+  quality_score: num,
+  performance_score: num,
+  maintainability_score: num,
+  issues: z
+    .array(
+      z.object({
+        title: z.string(),
+        category: z.string().nullish(),
+        severity: z.string().nullish(),
+        description: z.string().nullish(),
+        why_dangerous: z.string().nullish(),
+        line_start: num,
+        line_end: num,
+        cvss: num,
+        fix_explanation: z.string().nullish(),
+        fixed_code: z.string().nullish(),
+        code_snippet: z.string().nullish(),
+      }),
+    )
+    .nullish(),
 });
+
+type RawIssue = NonNullable<z.infer<typeof AnalysisSchema>["issues"]>[number];
+
+function normSeverity(v: string | null | undefined): (typeof SEVERITIES)[number] {
+  const s = (v ?? "").toLowerCase();
+  return (SEVERITIES as readonly string[]).includes(s)
+    ? (s as (typeof SEVERITIES)[number])
+    : "info";
+}
+
+function normCategory(v: string | null | undefined): (typeof CATEGORIES)[number] {
+  const s = (v ?? "").toLowerCase();
+  return (CATEGORIES as readonly string[]).includes(s)
+    ? (s as (typeof CATEGORIES)[number])
+    : "quality";
+}
+
+function clampScore(v: number | null | undefined, fallback = 70): number {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
 
 const SYSTEM_PROMPT = `You are AI Code Guardian, an expert security and code-quality reviewer.
 You analyze source code and produce a structured report. Rules:

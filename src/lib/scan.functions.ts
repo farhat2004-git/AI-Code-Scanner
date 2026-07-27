@@ -115,55 +115,62 @@ export const runScan = createServerFn({ method: "POST" })
         prompt: `Language: ${data.language}\n\nCode (line-numbered):\n\`\`\`\n${numbered}\n\`\`\``,
       });
 
+      const issues: RawIssue[] = a.issues ?? [];
+      const overall = clampScore(a.overall_score);
+      const security = clampScore(a.security_score);
+      const quality = clampScore(a.quality_score);
+      const perf = clampScore(a.performance_score);
+      const maint = clampScore(a.maintainability_score);
+
       await supabase
         .from("scans")
         .update({
           status: "done",
-          summary: a.summary,
-          overall_score: Math.round(a.overall_score),
-          security_score: Math.round(a.security_score),
-          quality_score: Math.round(a.quality_score),
-          performance_score: Math.round(a.performance_score),
-          maintainability_score: Math.round(a.maintainability_score),
+          summary: a.summary ?? null,
+          overall_score: overall,
+          security_score: security,
+          quality_score: quality,
+          performance_score: perf,
+          maintainability_score: maint,
           scores: {
-            overall: a.overall_score,
-            security: a.security_score,
-            quality: a.quality_score,
-            performance: a.performance_score,
-            maintainability: a.maintainability_score,
+            overall,
+            security,
+            quality,
+            performance: perf,
+            maintainability: maint,
           },
         })
         .eq("id", scan.id);
 
-      if (a.issues.length > 0) {
+      if (issues.length > 0) {
         await supabase.from("scan_issues").insert(
-          a.issues.map((i: z.infer<typeof AnalysisSchema>["issues"][number]) => ({
+          issues.map((i) => ({
             scan_id: scan.id,
             user_id: userId,
-            category: i.category,
-            severity: i.severity,
+            category: normCategory(i.category),
+            severity: normSeverity(i.severity),
             title: i.title,
-            description: i.description,
-            why_dangerous: i.why_dangerous,
-            line_start: i.line_start,
-            line_end: i.line_end,
-            cvss: i.cvss,
-            fix_explanation: i.fix_explanation,
-            fixed_code: i.fixed_code,
-            code_snippet: i.code_snippet,
+            description: i.description ?? null,
+            why_dangerous: i.why_dangerous ?? null,
+            line_start: i.line_start ?? null,
+            line_end: i.line_end ?? null,
+            cvss: i.cvss ?? null,
+            fix_explanation: i.fix_explanation ?? null,
+            fixed_code: i.fixed_code ?? null,
+            code_snippet: i.code_snippet ?? null,
           })),
         );
       }
 
-      const criticals = a.issues.filter((i) => i.severity === "critical").length;
-      const highs = a.issues.filter((i) => i.severity === "high").length;
+      const criticals = issues.filter((i) => normSeverity(i.severity) === "critical").length;
+      const highs = issues.filter((i) => normSeverity(i.severity) === "high").length;
       const notifType = criticals > 0 ? "critical" : highs > 0 ? "warning" : "success";
       const parts: string[] = [];
       if (criticals) parts.push(`${criticals} critical`);
       if (highs) parts.push(`${highs} high`);
       const summary = parts.length
-        ? `Found ${parts.join(", ")} · score ${Math.round(a.overall_score)}/100`
-        : `Clean scan · score ${Math.round(a.overall_score)}/100`;
+        ? `Found ${parts.join(", ")} · score ${overall}/100`
+        : `Clean scan · score ${overall}/100`;
 
       await supabase.from("notifications").insert({
         user_id: userId,

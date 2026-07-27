@@ -18,6 +18,8 @@ import { Route as AuthenticatedGithubRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedDepsRouteImport } from './routes/_authenticated.deps'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated.analytics'
+import { Route as AuthenticatedTeamsIndexRouteImport } from './routes/_authenticated.teams.index'
+import { Route as AuthenticatedTeamsIdRouteImport } from './routes/_authenticated.teams.$id'
 import { Route as AuthenticatedScanNewRouteImport } from './routes/_authenticated.scan.new'
 import { Route as AuthenticatedScanIdRouteImport } from './routes/_authenticated.scan.$id'
 
@@ -66,6 +68,16 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTeamsIndexRoute = AuthenticatedTeamsIndexRouteImport.update({
+  id: '/teams/',
+  path: '/teams/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTeamsIdRoute = AuthenticatedTeamsIdRouteImport.update({
+  id: '/teams/$id',
+  path: '/teams/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedScanNewRoute = AuthenticatedScanNewRouteImport.update({
   id: '/scan/new',
   path: '/scan/new',
@@ -88,6 +100,8 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
+  '/teams/$id': typeof AuthenticatedTeamsIdRoute
+  '/teams/': typeof AuthenticatedTeamsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +114,8 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/scan/$id': typeof AuthenticatedScanIdRoute
   '/scan/new': typeof AuthenticatedScanNewRoute
+  '/teams/$id': typeof AuthenticatedTeamsIdRoute
+  '/teams': typeof AuthenticatedTeamsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +130,8 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/scan/$id': typeof AuthenticatedScanIdRoute
   '/_authenticated/scan/new': typeof AuthenticatedScanNewRoute
+  '/_authenticated/teams/$id': typeof AuthenticatedTeamsIdRoute
+  '/_authenticated/teams/': typeof AuthenticatedTeamsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +146,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/scan/$id'
     | '/scan/new'
+    | '/teams/$id'
+    | '/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +160,8 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/scan/$id'
     | '/scan/new'
+    | '/teams/$id'
+    | '/teams'
   id:
     | '__root__'
     | '/'
@@ -153,6 +175,8 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/scan/$id'
     | '/_authenticated/scan/new'
+    | '/_authenticated/teams/$id'
+    | '/_authenticated/teams/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -227,6 +251,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/teams/': {
+      id: '/_authenticated/teams/'
+      path: '/teams'
+      fullPath: '/teams/'
+      preLoaderRoute: typeof AuthenticatedTeamsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/teams/$id': {
+      id: '/_authenticated/teams/$id'
+      path: '/teams/$id'
+      fullPath: '/teams/$id'
+      preLoaderRoute: typeof AuthenticatedTeamsIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/scan/new': {
       id: '/_authenticated/scan/new'
       path: '/scan/new'
@@ -252,6 +290,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedScanIdRoute: typeof AuthenticatedScanIdRoute
   AuthenticatedScanNewRoute: typeof AuthenticatedScanNewRoute
+  AuthenticatedTeamsIdRoute: typeof AuthenticatedTeamsIdRoute
+  AuthenticatedTeamsIndexRoute: typeof AuthenticatedTeamsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -262,6 +302,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedScanIdRoute: AuthenticatedScanIdRoute,
   AuthenticatedScanNewRoute: AuthenticatedScanNewRoute,
+  AuthenticatedTeamsIdRoute: AuthenticatedTeamsIdRoute,
+  AuthenticatedTeamsIndexRoute: AuthenticatedTeamsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

@@ -172,7 +172,8 @@ export const runScan = createServerFn({ method: "POST" })
         ? `Found ${parts.join(", ")} · score ${overall}/100`
         : `Clean scan · score ${overall}/100`;
 
-      await supabase.from("notifications").insert({
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("notifications").insert({
         user_id: userId,
         title: `Scan complete: ${data.title}`,
         body: summary,

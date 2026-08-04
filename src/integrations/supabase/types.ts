@@ -369,32 +369,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_read_scan: {
-        Args: { _scan_id: string; _user_id: string }
-        Returns: boolean
-      }
-      can_team_write: {
-        Args: { _team_id: string; _user_id: string }
-        Returns: boolean
-      }
-      current_user_email: { Args: never; Returns: string }
-      get_team_role: {
-        Args: { _team_id: string; _user_id: string }
-        Returns: Database["public"]["Enums"]["team_role"]
-      }
-      has_team_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["team_role"]
-          _team_id: string
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_team_member: {
-        Args: { _team_id: string; _user_id: string }
-        Returns: boolean
-      }
-      scan_team: { Args: { _scan_id: string }; Returns: string }
+      [_ in never]: never
     }
     Enums: {
       team_role: "admin" | "developer" | "viewer"

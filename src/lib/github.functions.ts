@@ -388,7 +388,8 @@ async function runAiAndPersist(opts: {
       ? `Found ${parts.join(", ")} · score ${Math.round(a.overall_score)}/100`
       : `Clean scan · score ${Math.round(a.overall_score)}/100`;
 
-    await opts.supabase.from("notifications").insert({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("notifications").insert({
       user_id: opts.userId,
       title: `Scan complete: ${opts.title}`,
       body: notifBody,
